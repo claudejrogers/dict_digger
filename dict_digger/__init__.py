@@ -1,27 +1,28 @@
+import functools
 
 
-def dig(your_dict, *keys, **kwargs):
+def dig(collection, *keys, fail=False):
     """
-    digs into an dict, if anything along the way is None, then simply return None
+    Digs into an collection. If anything along the way is not in the collection,
+    then simply return None.
 
-    **now supports dicts, lists and tupples!!
-
-    pass fail=True if you want to through an IndexError vs just returing None
+    Set fail=True if you want to raise an Error instead of returing None.
 
     """
-    end_of_chain = your_dict
-    for key in keys:
-        if isinstance(end_of_chain, dict) and key in end_of_chain:
-            end_of_chain = end_of_chain[key]
-        elif isinstance(end_of_chain, (list, tuple)) and isinstance(key, int):
-            end_of_chain = end_of_chain[key]
-        else:
-            if 'fail' in kwargs and kwargs['fail'] is True:
-                if isinstance(end_of_chain,dict):
+    class DiggerException(Exception):
+        pass
+
+    def get_item(collection, key):
+        try:
+            return collection[key]
+        except (KeyError, IndexError, TypeError):
+            if fail:
+                if isinstance(collection, dict):
                     raise KeyError
                 else:
                     raise IndexError
-            else:
-                return None
-
-    return end_of_chain
+            raise DiggerException
+    try:
+        return functools.reduce(get_item, keys, collection)
+    except DiggerException:
+        return None
