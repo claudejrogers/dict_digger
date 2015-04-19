@@ -1,6 +1,5 @@
 import nose
-from nose.tools import *
-from nose.tools import assert_raises
+from nose.tools import eq_, raises
 import dict_digger
 
 
@@ -34,46 +33,50 @@ TEST_COMPLEX = {
 
 
 def test_nested_find():
-    result = dict_digger.dig(TEST_HASH,'a','b')
+    result = dict_digger.dig(TEST_HASH, 'a', 'b')
     eq_("tuna", result)
 
 
 def test_toplevel_find():
-    result = dict_digger.dig(TEST_HASH,'a')
+    result = dict_digger.dig(TEST_HASH, 'a')
     eq_({'b': 'tuna', 'c': 'fish'}, result)
 
 
 def test_nested_miss():
-    result = dict_digger.dig(TEST_HASH,'c','b')
+    result = dict_digger.dig(TEST_HASH, 'c', 'b')
     eq_(None, result)
 
 
 def test_end_point_miss():
-    result = dict_digger.dig(TEST_HASH,'a','z')
+    result = dict_digger.dig(TEST_HASH, 'a', 'z')
     eq_(None, result)
 
 
 def test_complex_find():
-    result = dict_digger.dig(TEST_COMPLEX,'a','list',0)
-    assert isinstance(result,dict)
-    result = dict_digger.dig(TEST_COMPLEX,'a','list',0,'x')
+    result = dict_digger.dig(TEST_COMPLEX, 'a', 'list', 0)
+    assert isinstance(result, dict)
+    result = dict_digger.dig(TEST_COMPLEX, 'a', 'list', 0, 'x')
     eq_('peanut butter', result)
 
 
 def test_list_find():
-    result = dict_digger.dig(TEST_LIST,0,'b')
+    result = dict_digger.dig(TEST_LIST, 0, 'b')
     eq_("tuna", result)
 
 
 def test_no_exception():
-    result = dict_digger.dig(TEST_LIST,0,'b','c')
+    result = dict_digger.dig(TEST_LIST, 0, 'b', 'c')
     assert result is None
 
+
 @raises(IndexError)
-def test_exception():
-    dict_digger.dig(TEST_LIST,0,'b','c', fail=True)
+def test_list_exception():
+    dict_digger.dig(TEST_LIST, 0, 'b', 'c', fail=True)
 
 
+@raises(KeyError)
+def test_dict_exception():
+    dict_digger.dig(TEST_COMPLEX, 'a', 'e', fail=True)
 
 
 if __name__ == "__main__":
